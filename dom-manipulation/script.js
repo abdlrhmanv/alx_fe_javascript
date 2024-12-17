@@ -13,7 +13,7 @@ const addQuoteBtn = document.getElementById('addQuoteBtn');
 const newQuoteText = document.getElementById('newQuoteText');
 const newQuoteCategory = document.getElementById('newQuoteCategory');
 
-function ShowRandomQuote() {
+function ShowRandomQuote () {
     const randomIndex = Math.floor(Math.random() * quotes.length);
     const randomQuote = quotes[randomIndex];
 
@@ -23,7 +23,7 @@ function ShowRandomQuote() {
     `;
 }
 
-function addQuote() {
+function addQuote () {
     const quote = newQuoteText.value.trim();
     const category = newQuoteCategory.value.trim();
 
@@ -39,7 +39,7 @@ function addQuote() {
 
     alert('New quote added successfully!');
 
-    ShowRandomQuote();
+    ShowRandomQuote ();
 }
 
 newQuoteBtn.addEventListener('click', ShowRandomQuote);
