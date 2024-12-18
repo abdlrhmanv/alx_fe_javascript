@@ -1,4 +1,4 @@
-const quotes = [
+const quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { text: "The journey of a thousand miles begins with a single step.", category: "Motivation" },
     { text: "Success is not the key to happiness. Happiness is the key to success.", category: "Success" },
     { text: "Happiness depends upon ourselves.", category: "Happiness" },
