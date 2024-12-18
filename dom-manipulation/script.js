@@ -78,12 +78,14 @@ function exportQuotes() {
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
-    link.hres = url;
-    link.download = 'quotes.json';
-    link.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quotes.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-    URL.revokeObjectURL(url);
+    alert('Quotes exported successfully!');
 }
 
 function importFromJsonFile(event){
@@ -101,6 +103,9 @@ function importFromJsonFile(event){
     };
     fileReader.readAsText(event.target.files[0]);
 };
+
+const exportQuotesBtn = document.getElementById('exportQuotes');
+exportQuotesBtn.addEventListener('click', exportQuotes);
 
 newQuoteBtn.addEventListener('click', showRandomQuote);
 document.addEventListener('DOMContentLoaded', () => {
