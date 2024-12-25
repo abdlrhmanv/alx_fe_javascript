@@ -46,7 +46,6 @@ function filterQuotes() {
     }
 }
 
-
 function createAddQuoteForm() {
     const formContainer = document.createElement('div');
 
@@ -74,14 +73,10 @@ function createAddQuoteForm() {
 }
 
 async function addQuoteToServer(newQuote) {
-    const serverQuotesUrl = 'https://jsonplaceholder.typicode.com/posts';
-
     try {
-        const response = await fetch(serverQuotesUrl, {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newQuote)
         });
 
@@ -90,10 +85,11 @@ async function addQuoteToServer(newQuote) {
             throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
         const data = await response.json();
+        newQuote.id = data.id;
         console.log('Success:', data);
         alert('Quote added to server (mock).');
 
-        quotes.push(newQuote); // Update local quotes after successful mock server add
+        quotes.push(newQuote);
         saveQuotes();
         populateCategories();
         filterQuotes();
@@ -127,14 +123,38 @@ function saveQuotes() {
     localStorage.setItem('quotes', JSON.stringify(quotes));
 }
 
-async function fetchQuotesFromServer() {
-    const serverQuotesUrl = 'https://jsonplaceholder.typicode.com/posts';
-
+async function syncQuotes() {
     try {
-        const response = await fetch(serverQuotesUrl);
+        for (const quote of quotes) {
+            if (!quote.id) {
+                const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(quote)
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                }
+                const data = await response.json();
+                quote.id = data.id;
+                console.log('Quote synced:', data);
+            }
+        }
+        saveQuotes();
+        alert('Quotes synced with server.');
+    } catch (error) {
+        console.error('Error syncing quotes:', error);
+        alert('Error syncing quotes with server.');
+    }
+}
+
+async function fetchQuotesFromServer() {
+    try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
         const serverQuotes = await response.json();
 
-        const serverData = serverQuotes.map(item => ({ text: item.title, category: "Server" }));
+        const serverData = serverQuotes.map(item => ({ text: item.title, category: "Server", id: item.id }));
 
         const mergedQuotes = [...serverData, ...quotes.filter(localQuote => !serverData.some(serverQuote => serverQuote.text === localQuote.text))];
 
@@ -144,9 +164,9 @@ async function fetchQuotesFromServer() {
         populateCategories();
         filterQuotes();
 
-        alert('Data synced with server successfully.');
+        alert('Data fetched from server successfully.');
     } catch (error) {
-        console.error('Error syncing with server:', error);
+        console.error('Error fetching quotes from server:', error);
     }
 }
 
@@ -155,7 +175,7 @@ newQuoteBtn.addEventListener('click', filterQuotes);
 const syncBtn = document.createElement('button');
 syncBtn.id = 'syncBtn';
 syncBtn.textContent = 'Sync with Server';
-syncBtn.addEventListener('click', fetchQuotesFromServer);
+syncBtn.addEventListener('click', syncQuotes);
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.body.insertBefore(categoryFilter, quoteDisplay);
@@ -166,5 +186,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     createAddQuoteForm();
     document.body.appendChild(syncBtn);
 
-    await fetchQuotesFromServer(); // Fetch on initial load
+    await fetchQuotesFromServer();
 });
