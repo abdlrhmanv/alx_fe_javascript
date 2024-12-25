@@ -123,8 +123,38 @@ function saveQuotes() {
     localStorage.setItem('quotes', JSON.stringify(quotes));
 }
 
+// Simulate server sync
+function syncWithServer() {
+    const serverQuotesUrl = 'https://jsonplaceholder.typicode.com/posts'; // Example URL
+
+    fetch(serverQuotesUrl)
+        .then(response => response.json())
+        .then(serverQuotes => {
+            const serverData = serverQuotes.map(item => ({ text: item.title, category: "Server" }));
+
+            // Merge server data with local data, prioritizing server data in conflicts
+            const mergedQuotes = [...serverData, ...quotes.filter(localQuote => !serverData.some(serverQuote => serverQuote.text === localQuote.text))];
+
+            quotes.length = 0; // Clear and update local quotes
+            quotes.push(...mergedQuotes);
+            saveQuotes();
+            populateCategories();
+            filterQuotes();
+
+            alert('Data synced with server successfully.');
+        })
+        .catch(error => {
+            console.error('Error syncing with server:', error);
+        });
+}
+
 // Initial setup
 newQuoteBtn.addEventListener('click', filterQuotes);
+
+const syncBtn = document.createElement('button');
+syncBtn.id = 'syncBtn';
+syncBtn.textContent = 'Sync with Server';
+syncBtn.addEventListener('click', syncWithServer);
 
 document.addEventListener('DOMContentLoaded', () => {
     // Create the filter dropdown
@@ -136,4 +166,5 @@ document.addEventListener('DOMContentLoaded', () => {
     filterQuotes();
 
     createAddQuoteForm();
+    document.body.appendChild(syncBtn);
 });
