@@ -124,7 +124,7 @@ function saveQuotes() {
 }
 
 // Simulate server sync
-function syncWithServer() {
+function fetchQuotesFromServer() {
     const serverQuotesUrl = 'https://jsonplaceholder.typicode.com/posts'; // Example URL
 
     fetch(serverQuotesUrl)
@@ -154,7 +154,7 @@ newQuoteBtn.addEventListener('click', filterQuotes);
 const syncBtn = document.createElement('button');
 syncBtn.id = 'syncBtn';
 syncBtn.textContent = 'Sync with Server';
-syncBtn.addEventListener('click', syncWithServer);
+syncBtn.addEventListener('click', fetchQuotesFromServer);
 
 document.addEventListener('DOMContentLoaded', () => {
     // Create the filter dropdown
