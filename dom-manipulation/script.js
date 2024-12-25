@@ -170,12 +170,43 @@ async function fetchQuotesFromServer() {
     }
 }
 
+const syncInterval = 5000;
+let syncIntervalId;
+
+function startSyncInterval() {
+    if (!syncIntervalId) {
+        syncIntervalId = setInterval(syncQuotes, syncInterval);
+        console.log("Sync interval started.");
+    }
+}
+
+function stopSyncInterval() {
+    if (syncIntervalId) {
+        clearInterval(syncIntervalId);
+        syncIntervalId = null;
+        console.log("Sync interval stopped.");
+    }
+}
+
 newQuoteBtn.addEventListener('click', filterQuotes);
 
 const syncBtn = document.createElement('button');
 syncBtn.id = 'syncBtn';
-syncBtn.textContent = 'Sync with Server';
+syncBtn.textContent = 'Sync Now';
 syncBtn.addEventListener('click', syncQuotes);
+
+const toggleSyncBtn = document.createElement('button');
+toggleSyncBtn.id = 'toggleSyncBtn';
+toggleSyncBtn.textContent = 'Start Auto Sync';
+toggleSyncBtn.addEventListener('click', () => {
+    if (syncIntervalId) {
+        stopSyncInterval();
+        toggleSyncBtn.textContent = 'Start Auto Sync';
+    } else {
+        startSyncInterval();
+        toggleSyncBtn.textContent = 'Stop Auto Sync';
+    }
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
     document.body.insertBefore(categoryFilter, quoteDisplay);
@@ -185,6 +216,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     filterQuotes();
     createAddQuoteForm();
     document.body.appendChild(syncBtn);
+    document.body.appendChild(toggleSyncBtn);
 
     await fetchQuotesFromServer();
+    startSyncInterval();
 });
