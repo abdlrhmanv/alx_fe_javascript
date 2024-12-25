@@ -125,27 +125,48 @@ function saveQuotes() {
 
 async function syncQuotes() {
     try {
+        let syncedCount = 0;
+        let conflictCount = 0;
+
         for (const quote of quotes) {
             if (!quote.id) {
-                const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(quote)
-                });
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                try {
+                    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(quote)
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                    }
+                    const data = await response.json();
+                    quote.id = data.id;
+                    console.log('Quote synced:', data);
+                    syncedCount++;
+                } catch (error) {
+                    console.error("Error syncing a quote: ", error);
+                    conflictCount++;
                 }
-                const data = await response.json();
-                quote.id = data.id;
-                console.log('Quote synced:', data);
             }
         }
+
         saveQuotes();
-        alert('Quotes synced with server.');
+
+        let message = "";
+        if (syncedCount > 0) {
+            message += `Successfully synced ${syncedCount} quote${syncedCount > 1 ? 's' : ''}. `;
+        }
+        if (conflictCount > 0) {
+            message += `Encountered ${conflictCount} conflict${conflictCount > 1 ? 's' : ''} during sync. Check the console for details.`;
+        }
+        if (syncedCount === 0 && conflictCount === 0) {
+            message = "No new quotes to sync."
+        }
+        alert(message);
     } catch (error) {
-        console.error('Error syncing quotes:', error);
-        alert('Error syncing quotes with server.');
+        console.error('Error during sync:', error);
+        alert('Error during sync. Check the console for details.');
     }
 }
 
