@@ -154,14 +154,15 @@ async function syncQuotes() {
         saveQuotes();
 
         let message = "";
-        if (syncedCount > 0) {
-            message += `Successfully synced ${syncedCount} quote${syncedCount > 1 ? 's' : ''}. `;
+        if (syncedCount > 0 && conflictCount === 0) {
+            message = "Quotes synced with server!"; // Exact phrase
+        } else if (syncedCount > 0 && conflictCount > 0) {
+            message = `Successfully synced ${syncedCount} quote${syncedCount > 1 ? 's' : ''}. Encountered ${conflictCount} conflict${conflictCount > 1 ? 's' : ''} during sync. Check the console for details.`;
+        } else if (syncedCount === 0 && conflictCount > 0) {
+          message = `Encountered ${conflictCount} conflict${conflictCount > 1 ? 's' : ''} during sync. Check the console for details.`;
         }
-        if (conflictCount > 0) {
-            message += `Encountered ${conflictCount} conflict${conflictCount > 1 ? 's' : ''} during sync. Check the console for details.`;
-        }
-        if (syncedCount === 0 && conflictCount === 0) {
-            message = "No new quotes to sync."
+        else {
+            message = "No new quotes to sync.";
         }
         alert(message);
     } catch (error) {
