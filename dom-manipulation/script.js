@@ -124,29 +124,29 @@ function saveQuotes() {
 }
 
 // Simulate server sync
-function fetchQuotesFromServer() {
+async function fetchQuotesFromServer() {
     const serverQuotesUrl = 'https://jsonplaceholder.typicode.com/posts'; // Example URL
-
-    fetch(serverQuotesUrl)
-        .then(response => response.json())
-        .then(serverQuotes => {
-            const serverData = serverQuotes.map(item => ({ text: item.title, category: "Server" }));
-
-            // Merge server data with local data, prioritizing server data in conflicts
-            const mergedQuotes = [...serverData, ...quotes.filter(localQuote => !serverData.some(serverQuote => serverQuote.text === localQuote.text))];
-
-            quotes.length = 0; // Clear and update local quotes
-            quotes.push(...mergedQuotes);
-            saveQuotes();
-            populateCategories();
-            filterQuotes();
-
-            alert('Data synced with server successfully.');
-        })
-        .catch(error => {
-            console.error('Error syncing with server:', error);
-        });
-}
+  
+    try {
+      const response = await fetch(serverQuotesUrl);
+      const serverQuotes = await response.json();
+  
+      const serverData = serverQuotes.map(item => ({ text: item.title, category: "Server" }));
+  
+      // Merge server data with local data, prioritizing server data in conflicts
+      const mergedQuotes = [...serverData, ...quotes.filter(localQuote => !serverData.some(serverQuote => serverQuote.text === localQuote.text))];
+  
+      quotes.length = 0; // Clear and update local quotes
+      quotes.push(...mergedQuotes);
+      saveQuotes();
+      populateCategories();
+      filterQuotes();
+  
+      alert('Data synced with server successfully.');
+    } catch (error) {
+      console.error('Error syncing with server:', error);
+    }
+  }
 
 // Initial setup
 newQuoteBtn.addEventListener('click', filterQuotes);
@@ -156,7 +156,7 @@ syncBtn.id = 'syncBtn';
 syncBtn.textContent = 'Sync with Server';
 syncBtn.addEventListener('click', fetchQuotesFromServer);
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Create the filter dropdown
     document.body.insertBefore(categoryFilter, quoteDisplay);
     categoryFilter.addEventListener('change', filterQuotes);
@@ -167,4 +167,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createAddQuoteForm();
     document.body.appendChild(syncBtn);
+    await fetchQuotesFromServer();
 });
